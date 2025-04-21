@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Tycoon - Edição Avançada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --danger: #d63031;
+            --warning: #fdcb6e;
+            --success: #00b894;
+            --dark: #1e272e;
+            --light: #f5f6fa;
+            --background: #0a192f;
+            --surface: #16213e;
+            --text: #ffffff;
+            --nft: #fd79a8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: var(--secondary);
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .auth-buttons button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        /* Game Dashboard */
+        .game-container {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .crypto-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .crypto-info h2 {
+            font-size: 1.8rem;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .crypto-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .crypto-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: rgba(0, 206, 201, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        /* Mining Section */
+        .mining-section {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .mining-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .mining-controls button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .start-mining {
+            background: var(--success);
+            color: white;
+        }
+
+        .stop-mining {
+            background: var(--danger);
+            color: white;
+        }
+
+        .upgrade-mining {
+            background: var(--primary);
+            color: white;
+            margin-left: 10px;
+        }
+
+        .mining-progress {
+            height: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        /* NFT & Market Section */
+        .nft-market {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .nft-section, .market-section {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .nft-section h3 {
+            color: var(--nft);
+        }
+
+        .nft-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nft-item:last-child {
+            border-bottom: none;
+        }
+
+        .nft-info h4 {
+            font-size: 1.1rem;
+        }
+
+        .nft-info p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .nft-btn {
+            padding: 8px 15px;
+            background: var(--nft);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Achievements */
+        .achievements-section {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .achievement-icon {
+            font-size: 1.5rem;
+            color: var(--warning);
+        }
+
+        /* Price Chart */
+        .chart-container {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            height: 300px;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nft-market {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-coins"></i>
+                <span>CRYPTO TYCOON</span>
+            </div>
+            <div class="auth-buttons">
+                <button class="login-btn" id="login-btn">Entrar</button>
+                <button class="register-btn" id="register-btn">Criar Conta</button>
+            </div>
+        </header>
+
+        <!-- Game Dashboard -->
+        <div class="game-container" id="game-container">
+            <div class="crypto-header">
+                <div class="crypto-info">
+                    <h2 id="crypto-name">K-TECH Coin</h2>
+                    <p class="crypto-price" id="crypto-price">R$ 0.25</p>
+                </div>
+                <div class="crypto-stats">
+                    <div class="stat-card">
+                        <h3>Seu Saldo</h3>
+                        <p id="user-balance">0 KTC</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Investidores</h3>
+                        <p id="investors">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>NFTs</h3>
+                        <p id="nft-count">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mining-section">
+                <div class="mining-header">
+                    <h3>Mineração</h3>
+                    <div class="mining-controls">
+                        <button class="start-mining" id="start-mining">Iniciar Mineração</button>
+                        <button class="upgrade-mining" id="upgrade-btn">Upgrades</button>
+                    </div>
+                </div>
+                <div class="mining-progress">
+                    <div class="progress-bar" id="mining-progress"></div>
+                </div>
+                <p>Velocidade: <span id="mining-speed">1 KTC/h</span></p>
+            </div>
+
+            <div class="nft-market">
+                <div class="nft-section">
+                    <h3>Seus NFTs</h3>
+                    <div class="nft-item">
+                        <div class="nft-info">
+                            <h4>NFT #001</h4>
+                            <p>Colecionável Raro</p>
+                        </div>
+                        <button class="nft-btn" id="sell-nft">Vender</button>
+                    </div>
+                </div>
+                <div class="market-section">
+                    <h3>Mercado P2P</h3>
+                    <p>Negocie com outros jogadores.</p>
+                    <button class="upgrade-btn" id="trade-btn">Abrir Mercado</button>
+                </div>
+            </div>
+
+            <div class="achievements-section">
+                <h3>Conquistas</h3>
+                <div class="achievement-item">
+                    <i class="fas fa-trophy achievement-icon"></i>
+                    <div>
+                        <h4>Primeira Mina</h4>
+                        <p>Ganhe 10 KTC</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="price-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Login Modal -->
+        <div class="modal" id="login-modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Entrar</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">E-mail</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Senha</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="form-submit">Entrar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Register Modal -->
+        <div class="modal" id="register-modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Criar Conta</h2>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-name">Nome da Criptomoeda</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">E-mail</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Senha</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <button type="submit" class="form-submit">Criar Conta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCUzyHZpl6AzSBycB2Qpf4Xv5_hFiLFI1I",
+            authDomain: "ktech-c8ef5.firebaseapp.com",
+            databaseURL: "https://ktech-c8ef5-default-rtdb.firebaseio.com",
+            projectId: "ktech-c8ef5",
+            storageBucket: "ktech-c8ef5.appspot.com",
+            messagingSenderId: "687033592766",
+            appId: "1:687033592766:web:f1ba5c2ff1b213679267ef",
+            measurementId: "G-RM29LGLJR1"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Game Data
+        let gameData = {
+            cryptoName: "K-TECH Coin",
+            balance: 0,
+            price: 0.25,
+            miningSpeed: 1,
+            miningProgress: 0,
+            isMining: false,
+            investors: 0,
+            nfts: [],
+            achievements: []
+        };
+
+        // DOM Elements
+        const gameContainer = document.getElementById('game-container');
+        const cryptoNameEl = document.getElementById('crypto-name');
+        const cryptoPriceEl = document.getElementById('crypto-price');
+        const userBalanceEl = document.getElementById('user-balance');
+        const investorsEl = document.getElementById('investors');
+        const nftCountEl = document.getElementById('nft-count');
+        const startMiningBtn = document.getElementById('start-mining');
+        const miningProgressEl = document.getElementById('mining-progress');
+        const miningSpeedEl = document.getElementById('mining-speed');
+
+        // Modals
+        const loginModal = document.getElementById('login-modal');
+        const registerModal = document.getElementById('register-modal');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const closeModalBtns = document.querySelectorAll('.close-modal');
+
+        // Chart
+        let priceChart;
+
+        // Initialize Game
+        function initGame(userId) {
+            loadGameData(userId);
+            initChart();
+            setupEventListeners();
+        }
+
+        // Load Game Data from Firestore
+        function loadGameData(userId) {
+            db.collection("users").doc(userId).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    gameData = data;
+                    updateUI();
+                }
+            });
+        }
+
+        // Save Game Data to Firestore
+        function saveGameData(userId) {
+            db.collection("users").doc(userId).set(gameData, { merge: true });
+        }
+
+        // Update UI
+        function updateUI() {
+            cryptoNameEl.textContent = gameData.cryptoName;
+            cryptoPriceEl.textContent = `R$ ${gameData.price.toFixed(2)}`;
+            userBalanceEl.textContent = `${gameData.balance.toFixed(2)} KTC`;
+            investorsEl.textContent = gameData.investors;
+            nftCountEl.textContent = gameData.nfts.length;
+            miningSpeedEl.textContent = `${gameData.miningSpeed} KTC/h`;
+            miningProgressEl.style.width = `${gameData.miningProgress * 100}%`;
+        }
+
+        // Mining System
+        function startMining(userId) {
+            if (gameData.isMining) return;
+
+            gameData.isMining = true;
+            startMiningBtn.textContent = "Parar Mineração";
+            startMiningBtn.classList.remove('start-mining');
+            startMiningBtn.classList.add('stop-mining');
+
+            const miningInterval = setInterval(() => {
+                if (!gameData.isMining) {
+                    clearInterval(miningInterval);
+                    return;
+                }
+
+                gameData.miningProgress += gameData.miningSpeed / 3600;
+                miningProgressEl.style.width = `${Math.min(gameData.miningProgress * 100, 100)}%`;
+
+                if (gameData.miningProgress >= 1) {
+                    gameData.balance += 1;
+                    gameData.miningProgress = 0;
+                    updateUI();
+                    showToast("+1 KTC minerado!", "success");
+                    checkAchievements(userId);
+                }
+
+                saveGameData(userId);
+            }, 1000);
+        }
+
+        function stopMining(userId) {
+            gameData.isMining = false;
+            startMiningBtn.textContent = "Iniciar Mineração";
+            startMiningBtn.classList.remove('stop-mining');
+            startMiningBtn.classList.add('start-mining');
+            saveGameData(userId);
+        }
+
+        // Achievements System
+        function checkAchievements(userId) {
+            if (gameData.balance >= 10 && !gameData.achievements.includes("first_mining")) {
+                gameData.achievements.push("first_mining");
+                showToast("🏆 Conquista desbloqueada: Primeira Mina!", "success");
+                saveGameData(userId);
+            }
+        }
+
+        // Toast Notifications
+        function showToast(message, type = "info") {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: type === "success" ? "#00b894" : type === "error" ? "#d63031" : "#6c5ce7",
+            }).showToast();
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Login/Register Modals
+            loginBtn.addEventListener('click', () => loginModal.style.display = "flex");
+            registerBtn.addEventListener('click', () => registerModal.style.display = "flex");
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    btn.closest('.modal').style.display = "none";
+                });
+            });
+
+            // Auth System
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        gameContainer.style.display = "block";
+                        initGame(user.uid);
+                        loginModal.style.display = "none";
+                    })
+                    .catch((error) => {
+                        showToast(error.message, "error");
+                    });
+            });
+
+            document.getElementById('register-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+                        gameData.cryptoName = name;
+                        db.collection("users").doc(user.uid).set(gameData);
+                        gameContainer.style.display = "block";
+                        initGame(user.uid);
+                        registerModal.style.display = "none";
+                    })
+                    .catch((error) => {
+                        showToast(error.message, "error");
+                    });
+            });
+
+            // Mining Controls
+            startMiningBtn.addEventListener('click', () => {
+                if (auth.currentUser) {
+                    if (gameData.isMining) {
+                        stopMining(auth.currentUser.uid);
+                    } else {
+                        startMining(auth.currentUser.uid);
+                    }
+                } else {
+                    showToast("Faça login para minerar!", "error");
+                }
+            });
+
+            // Random Events
+            setInterval(() => {
+                if (auth.currentUser) {
+                    const randomEvent = Math.random();
+                    if (randomEvent < 0.1) {
+                        showToast("⚠️ Ataque hacker detectado!", "error");
+                    } else if (randomEvent < 0.2) {
+                        gameData.investors += 1;
+                        gameData.price += 0.01;
+                        updateUI();
+                        saveGameData(auth.currentUser.uid);
+                        showToast("🎉 Novo investidor! +R$0.01", "success");
+                    }
+                }
+            }, 10000);
+        }
+
+        // Initialize Chart
+        function initChart() {
+            const ctx = document.getElementById('price-chart').getContext('2d');
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Valor da K-TECH (R$)',
+                        data: [0.10, 0.15, 0.20, 0.18, 0.25, 0.30],
+                        borderColor: '#00cec9',
+                        backgroundColor: 'rgba(0, 206, 201, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Check Auth State
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                gameContainer.style.display = "block";
+                initGame(user.uid);
+            } else {
+                gameContainer.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
